@@ -40,7 +40,9 @@ Example:
   "email": "mcfly@hillvalley.edu",
   "phoneNumber": "123456"
 }
-Response:
+```
+**Response**:
+```json
 {
   "contact": {
     "primaryContactId": 1,
@@ -49,11 +51,13 @@ Response:
     "secondaryContactIds": [23]
   }
 }
-Error Handling:
+```
+**Error Handling**:
 
 If both email and phoneNumber are missing in the request:
 json
-Copy code
+```json
 {
   "error": "Email or Phone number is required"
 }
+```
