@@ -54,16 +54,25 @@ app.post('/identify', async (req, res) => {
             }
         }
         const arr = [...mySet]
-        if (mySet.size === 1) {   //if 1 parent id that means case-2
-            if (email && phoneNumber) {
-                const contact = await prisma.contact.create({
-                    data: {
-                        email: email,
-                        phoneNumber: phoneNumber,
-                        linkedId: arr[0],
-                        linkPrecedence: "secondary"
-                    }
-                })
+        if (mySet.size === 1) {   // if am getting 1 parent in set
+            const rowExist = await prisma.contact.findFirst({     //this is for, if am getting the same row that is present in the table
+                where : {
+                    email : email,
+                    phoneNumber : phoneNumber
+                }
+            })
+            if(rowExist == null){     //if rowExist is empty that means i have some unique value in req.body
+                if (email && phoneNumber) {
+                    const contact = await prisma.contact.create({
+                        data: {
+                            email: email,
+                            phoneNumber: phoneNumber,
+                            linkedId: arr[0],
+                            linkPrecedence: "secondary"
+                        }
+                    })
+    
+                }
 
             }
             const primaryMail = await prisma.contact.findUnique({
@@ -112,7 +121,7 @@ app.post('/identify', async (req, res) => {
                 }
             })
         }
-        else if (mySet.size === 2) {    //  if 2 parents id that means case-3
+        else if (mySet.size === 2) {    //  if am getting 2 parents id the set
             arr.sort();
             const primaryId = arr[0];
             const id = arr[1]
