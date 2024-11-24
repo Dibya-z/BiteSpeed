@@ -21,11 +21,13 @@ exports.findContact = async(req,res)=>{
             }
         })
         console.log(contactToBeAdded);
+        const mail = contactToBeAdded.email ? contactToBeAdded.email : [];
+        const num = contactToBeAdded.phoneNumber ? contactToBeAdded.phoneNumber : [];
         return res.status(200).json({
             contact: {
                 primaryContatctId: contactToBeAdded.id,
-                emails: [contactToBeAdded.email],
-                phoneNumbers: [contactToBeAdded.phoneNumber],
+                emails: mail,
+                phoneNumbers: num,
                 secondaryContactIds: []
             }
         })
