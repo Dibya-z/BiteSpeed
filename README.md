@@ -42,6 +42,7 @@ Example:
 }
 ```
 **Response**:
+Success (HTTP 200): Returns the consolidated contact details:(just an example, actual respose can vary)
 ```json
 {
   "contact": {
@@ -55,9 +56,39 @@ Example:
 **Error Handling**:
 
 If both email and phoneNumber are missing in the request:
+Error (HTTP 400): Occurs if neither email nor phoneNumber is provided:
 json
 ```json
 {
   "error": "Email or Phone number is required"
 }
 ```
+##Database Behavior
+New Contact Creation:
+
+If no matching contact is found, a new Contact row is created with linkPrecedence: "primary".
+Link Existing Contacts:
+
+If an email or phoneNumber matches existing entries, the data is linked under the oldest "primary" contact.
+Primary to Secondary Transition:
+
+Updates the linkPrecedence of an existing primary contact to secondary if linking requires a new primary.
+
+And More
+## Database Schema
+
+The application uses a single table named `Contact`.
+
+```prisma
+model Contact {
+  id              Int       @id @default(autoincrement())
+  phoneNumber     String?   // Customer's phone number (optional)
+  email           String?   // Customer's email address (optional)
+  linkedId        Int?      // ID of the primary contact this contact is linked to
+  linkPrecedence  String    @default("primary") // Indicates whether the contact is primary or secondary
+  createdAt       DateTime  @default(now())     // Timestamp when the contact was created
+  updatedAt       DateTime  @updatedAt          // Timestamp when the contact was last updated
+  deletedAt       DateTime?                     // Timestamp when the contact was deleted (optional)
+}
+```
+
