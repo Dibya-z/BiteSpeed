@@ -63,18 +63,18 @@ json
   "error": "Email or Phone number is required"
 }
 ```
-##Database Behavior
-New Contact Creation:
+## Database Behavior
+**1. New Contact Creation**:
 
 If no matching contact is found, a new Contact row is created with linkPrecedence: "primary".
-Link Existing Contacts:
+**2. Link Existing Contacts**:
 
 If an email or phoneNumber matches existing entries, the data is linked under the oldest "primary" contact.
-Primary to Secondary Transition:
+**3. Primary to Secondary Transition**:
 
 Updates the linkPrecedence of an existing primary contact to secondary if linking requires a new primary.
 
-And More
+**And more based on edge cases**
 ## Database Schema
 
 The application uses a single table named `Contact`.
