@@ -14,13 +14,13 @@ app.get('/', (req, res) => {
 
 app.post('/identify', async (req, res) => {
     const { email, phoneNumber } = req.body;
-    console.log(email,phoneNumber)
+    console.log(email, phoneNumber)
     if (!email && !phoneNumber) {
         return res.status(400).json({ error: "Email or Phone number is requierd" })
     }
     const relatedContacts = await prisma.contact.findMany({
         where: {
-            OR: [{ email},{phoneNumber}]
+            OR: [{ email }, { phoneNumber }]
         }
     });
     console.log(relatedContacts);
@@ -60,40 +60,40 @@ app.post('/identify', async (req, res) => {
                     data: {
                         email: email,
                         phoneNumber: phoneNumber,
-                        linkedId:  arr[0],
+                        linkedId: arr[0],
                         linkPrecedence: "secondary"
                     }
                 })
 
             }
             const primaryMail = await prisma.contact.findUnique({
-                where : {id : arr[0]},
-                select : {
-                    email : true,
+                where: { id: arr[0] },
+                select: {
+                    email: true,
                 }
             })
             const secondaryEmails = await prisma.contact.findMany({
-                where : {linkedId : arr[0]},
-                select : {
-                    email : true,
+                where: { linkedId: arr[0] },
+                select: {
+                    email: true,
                 }
             })
             const primaryNumber = await prisma.contact.findUnique({
-                where : {id : arr[0]},
-                select : {
-                    phoneNumber : true,
+                where: { id: arr[0] },
+                select: {
+                    phoneNumber: true,
                 }
             })
             const secondaryNumber = await prisma.contact.findMany({
-                where : {linkedId : arr[0]},
-                select : {
-                    phoneNumber : true,
+                where: { linkedId: arr[0] },
+                select: {
+                    phoneNumber: true,
                 }
             })
             const secondaryIds = await prisma.contact.findMany({
-                where : {linkedId : arr[0]},
-                select : {
-                    id : true
+                where: { linkedId: arr[0] },
+                select: {
+                    id: true
                 }
             })
             const mail = [primaryMail.email, ...secondaryEmails.map((item) => item.email)]
@@ -113,7 +113,71 @@ app.post('/identify', async (req, res) => {
             })
         }
         else if (mySet.size === 2) {    //  if 2 parents id that means case-3
-            
+            arr.sort();
+            const primaryId = arr[0];
+            const id = arr[1]
+
+            const updateParentContact = await prisma.contact.update({
+                where: { id: id },
+                data: {
+                    linkedId: primaryId,
+                    linkPrecedence: "secondary"
+                }
+            })
+            const updateChildContact = await prisma.contact.updateMany({
+                where: { linkedId: id },
+                data: {
+                    linkedId: primaryId,
+                    linkPrecedence: "secondary"
+                }
+            })
+
+            const primaryMail = await prisma.contact.findUnique({
+                where: { id: primaryId },
+                select: {
+                    email: true,
+                }
+            })
+            const secondaryEmails = await prisma.contact.findMany({
+                where: { linkedId: primaryId },
+                select: {
+                    email: true,
+                }
+            })
+            const primaryNumber = await prisma.contact.findUnique({
+                where: { id: primaryId },
+                select: {
+                    phoneNumber: true,
+                }
+            })
+            const secondaryNumber = await prisma.contact.findMany({
+                where: { linkedId: primaryId },
+                select: {
+                    phoneNumber: true,
+                }
+            })
+            const secondaryIds = await prisma.contact.findMany({
+                where: { linkedId: primaryId },
+                select: {
+                    id: true
+                }
+            })
+            const mail = [primaryMail.email, ...secondaryEmails.map((item) => item.email)]
+            const set = new Set(mail);
+            const mails = [...set]
+            const numbers = [primaryNumber.phoneNumber, ...secondaryNumber.map((item) => item.phoneNumber)]
+            const newset = new Set(numbers);
+            const nums = [...newset]
+            const secondaryContactIds = secondaryIds.map((item) => item.id);
+            return res.status(200).json({
+                contact: {
+                    primaryContatctId: primaryId,
+                    emails: mails,
+                    phoneNumbers: nums,
+                    secondaryContactIds: secondaryContactIds
+                }
+            })
+
         }
 
     }
