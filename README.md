@@ -40,7 +40,7 @@ Example:
   "email": "mcfly@hillvalley.edu",
   "phoneNumber": "123456"
 }
-**Response**:
+Response:
 {
   "contact": {
     "primaryContactId": 1,
